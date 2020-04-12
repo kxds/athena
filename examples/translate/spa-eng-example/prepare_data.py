@@ -24,15 +24,19 @@ def preprocess_sentence(w):
 
 def create_dataset(csv_file="examples/translate/spa-eng-examples/data/train.csv"):
     """ create and store in csv file """
-    path_to_zip = tf.keras.utils.get_file('spa-eng.zip',
-        origin='http://storage.googleapis.com/download.tensorflow.org/data/spa-eng.zip',
-        extract=True)
-    path_to_file = os.path.dirname(path_to_zip)+"/spa-eng/spa.txt"
+    # path_to_zip = tf.keras.utils.get_file('spa-eng.zip',
+    #     origin='http://storage.googleapis.com/download.tensorflow.org/data/spa-eng.zip',
+    #     extract=True)
+    # path_to_file = os.path.dirname(path_to_zip)+"/spa-eng/spa.txt"
+    # path_to_zip = tf.compat.v2.keras.utils.get_file('yue-eng.zip', origin='http://www.manythings.org/anki/yue-eng.zip',
+    #     extract=True, archive_format='auto')
+    path_to_file = os.path.dirname('examples/translate/spa-eng-example/')+"/spa-eng/spa.txt"
     lines = io.open(path_to_file, encoding='UTF-8').read().strip().split('\n')
     word_pairs = [[preprocess_sentence(w) for w in l.split('\t')] for l in lines[:None]]
     df = pandas.DataFrame(
         data=word_pairs, columns=["input_transcripts", "output_transcripts"]
     )
+    # df = df[["input_transcripts", "output_transcripts"]]
     csv_dir = os.path.dirname(csv_file)
     if not os.path.exists(csv_dir):
         os.mkdir(csv_dir)
