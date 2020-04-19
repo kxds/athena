@@ -19,7 +19,9 @@ import os
 import sys
 import codecs
 import pandas
+import linecache
 from absl import logging
+
 
 import tensorflow as tf
 from athena import get_wave_file_length
@@ -48,11 +50,16 @@ def convert_audio_and_split_transcript(dataset_dir, subset, out_csv_file):
             line = line[1]
             # get text
             text_f = line[:-4]+'.txt'
-            text = read(text_f).open()
-            text = ' '.text
+            text = open(text_f).read()
+            text = ' '.join(text)
+            # logging.info('metafile {}'.format(line[:-4]+'.metadata'))/
             # get speaker id
-            spk_line = open(line[:-4]+'.metadata').read()[22]
-            speaker = spk_line.strip().split()[1]
+            meta_f = line[:-4]+'.metadata'
+            with open(meta_f, 'rb') as tmp:
+                for id_, spk in enumerate(tmp):
+                    if id_ == 21:
+                        speaker = str(spk,encoding='utf-8').strip().split()[1]
+                        break
             wav_len =  get_wave_file_length(line)
             content.append((line, wav_len, text, speaker))
 
@@ -75,7 +82,7 @@ def processor(dataset_dir, subset, force_process, output_dir):
         logging.info("{} already exist".format(subset_csv))
         return subset_csv
     logging.info("Processing the ST_CMDS {} in {}".format(subset, dataset_dir))
-    convert_audio_and_split_transcript(dataset_dir, subset, subset_csv)
+    convert_audio_and_split_transcript(output_dir, subset, subset_csv)
     logging.info("Finished processing ST_CMDS {}".format(subset))
     return subset_csv
 
